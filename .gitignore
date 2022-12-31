@@ -1,3 +1,5 @@
 .env
 plain/
 plugins/
+mysql/
+notes.txt

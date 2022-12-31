@@ -2,29 +2,43 @@ services:
   
   strapi-db:
     image: beercan1989/arm-mysql:latest
-    profiles: ["m1"]
+    profiles: ["mysql"]
     ports:
       - "3306:3306"
-    environment: # Optional, same as -e in docker run
+    environment:
       MYSQL_USER: user
       MYSQL_PASSWORD: upassword
       MYSQL_DATABASE: strapi_db
       MYSQL_ROOT_PASSWORD: rpassword
     volumes: # Optional, same as -v in docker run
-      -  ${PWD}/db:/VAR/LIB/MYSQL
+      -  ./mysql/db:/VAR/LIB/MYSQL
     networks:
       - strapi-network
-  
-  strapi:
-    build:
+
+  strapi-mysql:
+    build: 
       context: .
-    profiles: ["m1"]
-    ports:
-      - "1337:1337"
+      dockerfile: mysql.dockerfile
+      args:
+        - PORTS=1337
+        - NAME=mysql-project
+        - DBCLIENT=mysql
+        - DBHOST=strapi-db
+        - DBPORT=3306
+        - DBNAME=strapi_db
+        - DBUSER=user
+        - DBPASS=upassword
+    profiles: ["mysql"]
     depends_on:
       - strapi-db
+    env_file:
+      - ./mysql/.env
+    ports:
+      # - "80" # user this for production - port 80 ${PORT}
+      - 1337:1337 # gets port number from .env file, so if you change it there it updates it here
     volumes: # Optional, same as -v in docker run
-      -  ${PWD}/strapi:/app
+      -  ./mysql/config/server.js:/app/$NAME/config/server.js
+      -  ./mysql/config/public:/app/$NAME/public
     networks:
       - strapi-network
 
@@ -36,7 +50,7 @@ services:
         - NAME=test-project
     profiles: ["plugins"]
     env_file:
-      - .env
+      - plugins/.env
     ports:
       # - "80" # user this for production - port 80 ${PORT}
       - ${PORT}:${PORT} # gets port number from .env file, so if you change it there it updates it here
@@ -45,7 +59,7 @@ services:
       -  ${PWD}/plugins-db:/app/$NAME/.tmp
       -  ${PWD}/plugins-public:/app/$NAME/public
     networks:
-      - strapi-plugins-network
+      - strapi-network
 
   strapi-plain:
     build: 
@@ -55,7 +69,7 @@ services:
         - NAME=plain-project
     profiles: ["plain"]
     env_file:
-      - .env
+      - plain/.env
     ports:
       # - "80" # user this for production - port 80 ${PORT}
       - ${PORT}:${PORT} # gets port number from .env file, so if you change it there it updates it here
@@ -64,7 +78,7 @@ services:
       -  ${PWD}/plain-db:/app/$NAME/.tmp
       -  ${PWD}/plain-public:/app/$NAME/public
     networks:
-      - strapi-plain-network
+      - strapi-network
 
 networks: # Optional, same as docker network create
   strapi-network:

@@ -11,7 +11,7 @@ ARG DBPASS
 WORKDIR /app
 
 RUN echo "Name of folder => $NAME"
-RUN npx create-strapi-app@latest "$NAME" --quickstart --no-run
+RUN yarn create strapi-app "$NAME" --no-run --dbclient "$DBCLIENT" --dbhost "$DBHOST" --dbport "$DBPORT" --dbname "$DBNAME" --dbusername "$DBUSER" --dbpassword "$DBPASS"
 
 WORKDIR /app/"$NAME"
 
@@ -29,6 +29,8 @@ RUN yarn add @offset-dev/strapi-calendar
 RUN yarn add @chartbrew/plugin-strapi
 
 RUN yarn build
+
+WORKDIR /app/"$NAME"
 
 EXPOSE 1337 80
 
