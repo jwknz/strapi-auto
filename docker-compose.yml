@@ -11,7 +11,7 @@ services:
       MYSQL_DATABASE: strapi_db
       MYSQL_ROOT_PASSWORD: rpassword
     volumes: # Optional, same as -v in docker run
-      -  ./mysql/db:/VAR/LIB/MYSQL
+      -  mysql-data:/VAR/LIB/MYSQL
     networks:
       - strapi-network
 
@@ -82,3 +82,6 @@ services:
 
 networks: # Optional, same as docker network create
   strapi-network:
+
+volumes:
+  mysql-data:
